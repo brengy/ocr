@@ -13,10 +13,13 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
+            background-image: url('C:/Users/yas/Documents/AI Projects/ocrPP/archive/AHDBase_TrainingSet/New folder/2.jpeg'); /* Add your background image here */
+            background-size: cover; /* Ensure the image covers the entire background */
+            background-position: center; /* Center the background image */
+            background-repeat: no-repeat; /* Prevent the image from repeating */
         }
         .container {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -33,6 +36,13 @@
             font-size: 1.2em;
             font-weight: bold;
         }
+        #uploadedImage {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -40,6 +50,7 @@
         <h1>Upload an Image for Digit Recognition</h1>
         <input type="file" id="fileInput" accept="image/*">
         <div id="result"></div>
+        <img id="uploadedImage" src="#" alt="Uploaded Image" style="display: none;">
     </div>
 
     <script>
@@ -65,6 +76,11 @@
                     document.getElementById('result').textContent = `Error: ${data.error}`;
                 } else {
                     document.getElementById('result').textContent = `Recognized Digit: ${data.result}`;
+                    
+                    // Display the uploaded image
+                    const uploadedImage = document.getElementById('uploadedImage');
+                    uploadedImage.src = `data:image/png;base64,${data.image}`;
+                    uploadedImage.style.display = 'block';
                 }
             })
             .catch(error => {

@@ -19,29 +19,52 @@
             background-repeat: no-repeat; /* Prevent the image from repeating */
         }
         .container {
-            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
+            max-width: 500px;
+            width: 100%;
         }
         h1 {
             margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
         }
         input[type="file"] {
             margin-bottom: 20px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 16px;
         }
         #result {
             margin-top: 20px;
             font-size: 1.2em;
             font-weight: bold;
+            color: #333;
         }
-        #uploadedImage {
+        .loading {
+            display: none;
             margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .image-container {
+            margin-top: 20px;
+        }
+        .image-container img {
             max-width: 100%;
             height: auto;
             border: 1px solid #ccc;
             border-radius: 4px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -49,19 +72,38 @@
     <div class="container">
         <h1>Upload an Image for Digit Recognition</h1>
         <input type="file" id="fileInput" accept="image/*">
+        <div class="loading" id="loading">Processing... Please wait.</div>
         <div id="result"></div>
-        <img id="uploadedImage" src="#" alt="Uploaded Image" style="display: none;">
+        <div class="image-container">
+            <img id="uploadedImage" src="#" alt="Uploaded Image" style="display: none;">
+        </div>
     </div>
 
     <script>
         document.getElementById('fileInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file) {
+                console.error("No file selected.");
+                return;
+            }
 
+            // Show loading message
+            const loadingDiv = document.getElementById('loading');
+            loadingDiv.style.display = 'block';
+
+            // Clear previous results
+            document.getElementById('result').textContent = '';
+            document.getElementById('uploadedImage').style.display = 'none';
+
+            // Prepare form data
             const formData = new FormData();
             formData.append('file', file);
 
-            fetch('http://127.0.0.1:5000/upload', {
+            // Debugging: Log the file being sent
+            console.log("File being sent:", file.name, file.type, file.size);
+
+            // Send the file to the backend
+            fetch('http://Brengyy.pythonanywhere.com/upload', {  // Update this URL to your PythonAnywhere domain
                 method: 'POST',
                 body: formData
             })
@@ -72,11 +114,19 @@
                 return response.json();
             })
             .then(data => {
+                console.log('Response data:', data);
+                // Hide loading message
+                loadingDiv.style.display = 'none';
+
                 if (data.error) {
+                    // Display error message
                     document.getElementById('result').textContent = `Error: ${data.error}`;
+                    document.getElementById('result').classList.add('error');
                 } else {
+                    // Display the recognized digit
                     document.getElementById('result').textContent = `Recognized Digit: ${data.result}`;
-                    
+                    document.getElementById('result').classList.remove('error');
+
                     // Display the uploaded image
                     const uploadedImage = document.getElementById('uploadedImage');
                     uploadedImage.src = `data:image/png;base64,${data.image}`;
@@ -84,7 +134,11 @@
                 }
             })
             .catch(error => {
+                console.error('Error:', error);
+                // Hide loading message and display error
+                loadingDiv.style.display = 'none';
                 document.getElementById('result').textContent = `Error: ${error.message}`;
+                document.getElementById('result').classList.add('error');
             });
         });
     </script>
